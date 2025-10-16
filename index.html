@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giriş Yap Lan</title>
+  <meta name="description" content="Güvenli giriş sayfası">
+  <title>Giriş Yap</title>
   <style>
     /* 🌈 Arka plan ve genel stil */
     body {
@@ -49,11 +50,32 @@
       background: #f2f2f2;
       font-size: 15px;
       transition: 0.3s;
+      box-sizing: border-box;
     }
 
     input:focus {
-      outline: none;
-      background: #e6e6e6;
+      outline: 2px solid #667eea;
+      background: #fff;
+    }
+
+    /* Şifre konteyneri */
+    .password-container {
+      position: relative;
+      width: 100%;
+    }
+
+    #togglePassword {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 16px;
+      padding: 0;
+      width: 24px;
+      height: 24px;
     }
 
     /* 🟦 Giriş butonu */
@@ -69,11 +91,22 @@
       cursor: pointer;
       margin-top: 10px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
     }
 
     button:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    button:disabled:hover {
+      box-shadow: none !important;
     }
 
     p {
@@ -82,9 +115,49 @@
       margin-top: 20px;
     }
 
+    /* Hata mesajı stili */
+    #error-message {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+
+    /* Yükleme göstergesi */
+    #loading {
+      display: none;
+      margin-top: 15px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 480px) {
       .login-container {
         padding: 30px 20px;
+        margin: 20px;
+        width: calc(100% - 40px);
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      input, button {
+        padding: 14px 15px;
+        font-size: 16px; /* iOS zoom'u önlemek için */
       }
     }
   </style>
@@ -92,55 +165,118 @@
 <body>
   <div class="login-container">
     <h2>Giriş Yap</h2>
-    <input type="email" id="email" placeholder="E-posta adresiii" required>
-    <input type="password" id="password" placeholder="Şifre" required>
-    <button id="loginBtn">Giriş</button>
+    <input type="email" id="email" placeholder="E-posta adresiniz" required>
+    
+    <div class="password-container">
+      <input type="password" id="password" placeholder="Şifreniz" required>
+      <button type="button" id="togglePassword">👁️</button>
+    </div>
+    
+    <button id="loginBtn">Giriş Yap</button>
+    
+    <div id="loading">
+      <div class="spinner"></div>
+      <p>Giriş yapılıyor...</p>
+    </div>
+    
     <p id="error-message"></p>
   </div>
 
- <script type="module">
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <script type="module">
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-const auth = getAuth();
-const db = getFirestore();
+    const auth = getAuth();
+    const db = getFirestore();
 
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Firestore'da kullanıcı belgesini kontrol et
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      // Daha önce kayıtlı kullanıcı
-      const role = userSnap.data().role;
-      if (role === "admin") {
-        window.location.href = "admin.html";
-      } else {
-        window.location.href = "user.html";
+    // Enter tuşu ile giriş
+    document.getElementById("password").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        login();
       }
-    } else {
-      // Yeni kullanıcı → otomatik kayıt
-      await setDoc(userRef, {
-        email: user.email,
-        role: "user",
-        createdAt: serverTimestamp()
-      });
-      window.location.href = "user.html";
+    });
+
+    // Şifre göster/gizle
+    document.getElementById("togglePassword").addEventListener("click", function() {
+      const passwordInput = document.getElementById("password");
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.textContent = type === "password" ? "👁️" : "🔒";
+    });
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginBtn = document.getElementById("loginBtn");
+      const errorMsg = document.getElementById("error-message");
+      const loading = document.getElementById("loading");
+
+      // Validasyon
+      if (!email || !password) {
+        errorMsg.textContent = "Lütfen tüm alanları doldurun!";
+        return;
+      }
+
+      // Butonu devre dışı bırak ve yükleme durumu
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Giriş Yapılıyor...";
+      loading.style.display = "block";
+      errorMsg.textContent = "";
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Firestore'da kullanıcı kontrolü
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const role = userSnap.data().role;
+          window.location.href = role === "admin" ? "admin.html" : "user.html";
+        } else {
+          // Yeni kullanıcı kaydı
+          await setDoc(userRef, {
+            email: user.email,
+            role: "user",
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp()
+          });
+          window.location.href = "user.html";
+        }
+
+      } catch (error) {
+        console.error("Giriş hatası:", error);
+        
+        // Hata mesajlarını Türkçeleştir
+        let errorMessage = "Giriş başarısız: ";
+        switch (error.code) {
+          case "auth/invalid-email":
+            errorMessage += "Geçersiz e-posta adresi";
+            break;
+          case "auth/user-not-found":
+            errorMessage += "Bu e-posta ile kayıtlı kullanıcı bulunamadı";
+            break;
+          case "auth/wrong-password":
+            errorMessage += "Hatalı şifre";
+            break;
+          case "auth/too-many-requests":
+            errorMessage += "Çok fazla deneme yaptınız. Lütfen daha sonra tekrar deneyin";
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        
+        errorMsg.textContent = errorMessage;
+        
+        // Butonu tekrar aktif et
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Giriş Yap";
+        loading.style.display = "none";
+      }
     }
 
-  } catch (error) {
-    document.getElementById("error-message").textContent = "Giriş hatası: " + error.message;
-  }
-});
-
-</script>
-
+    document.getElementById("loginBtn").addEventListener("click", login);
+  </script>
 </body>
 </html>
