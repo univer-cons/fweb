@@ -99,68 +99,47 @@
   </div>
 
  <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-  import { 
-    getAuth, 
-    signInWithEmailAndPassword 
-  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-  import { 
-    getFirestore, 
-    doc, 
-    getDoc, 
-    setDoc 
-  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-  // 🔧 Firebase ayarlarını buraya kendi projenden kopyala
-  const firebaseConfig = {
-    apiKey: "AIzaSyDMGZ1XtGWi4Cbo5nhhB2eQkcXTVU3aYk0",
-      authDomain: "ahmet-consulting.firebaseapp.com",
-      projectId: "ahmet-consulting",
-      storageBucket: "ahmet-consulting.appspot.com",
-      messagingSenderId: "253579961791",
-      appId: "1:253579961791:web:738c1277d865069a22fdc5",
-      measurementId: "G-KHQYBLGMN5"
-  };
+const auth = getAuth();
+const db = getFirestore();
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  document.getElementById("loginBtn").addEventListener("click", async () => {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const errorMessage = document.getElementById("error-message");
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-    try {
-      // 🔑 Kullanıcı girişi
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+    // Firestore'da kullanıcı belgesini kontrol et
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
 
-      // 🔍 Firestore'da kullanıcı belgesini kontrol et
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        // Firestore’da zaten varsa
-        const role = userSnap.data().role;
-        if (role === "admin") {
-          window.location.href = "admin.html";
-        } else {
-          window.location.href = "user.html";
-        }
+    if (userSnap.exists()) {
+      // Daha önce kayıtlı kullanıcı
+      const role = userSnap.data().role;
+      if (role === "admin") {
+        window.location.href = "admin.html";
       } else {
-        // ❗ Firestore’da yoksa — yeni kullanıcı oluştur
-        await setDoc(userRef, {
-          email: user.email,
-          role: "user",
-          createdAt: new Date().toISOString()
-        });
         window.location.href = "user.html";
       }
-    } catch (error) {
-      errorMessage.textContent = "Giriş hatası: " + error.message;
+    } else {
+      // Yeni kullanıcı → otomatik kayıt
+      await setDoc(userRef, {
+        email: user.email,
+        role: "user",
+        createdAt: serverTimestamp()
+      });
+      window.location.href = "user.html";
     }
-  });
+
+  } catch (error) {
+    document.getElementById("error-message").textContent = "Giriş hatası: " + error.message;
+  }
+});
+
 </script>
 
 </body>
