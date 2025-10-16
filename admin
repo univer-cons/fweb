@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Paneli</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      overflow: hidden;
+    }
+
+    /* 🔹 Sol Menü (Sidebar) */
+    .sidebar {
+      width: 250px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
+      transition: 0.3s;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 40px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    .menu a {
+      width: 100%;
+      display: block;
+      padding: 15px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .menu a:hover, .menu a.active {
+      background: rgba(255, 255, 255, 0.25);
+      border-left: 3px solid #fff;
+    }
+
+    /* 🔹 İçerik Alanı */
+    .content {
+      flex: 1;
+      background: #f5f7fb;
+      border-radius: 30px 0 0 30px;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .logout-btn {
+      margin-top: auto;
+      margin-bottom: 30px;
+      background: #fff;
+      color: #764ba2;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #764ba2;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      .sidebar h2, .menu a span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Admin</h2>
+    <div class="menu">
+      <a href="#" class="active" data-section="users">👤 <span>Kullanıcılar</span></a>
+      <a href="#" data-section="files">📁 <span>Dosyalar</span></a>
+      <a href="#" data-section="messages">💬 <span>Mesajlar</span></a>
+    </div>
+    <button class="logout-btn" id="logoutBtn">Çıkış Yap</button>
+  </div>
+
+  <div class="content">
+    <div id="users" class="section active">
+      <h1>Kullanıcılar</h1>
+      <div class="card"><h3>Yükleniyor...</h3></div>
+    </div>
+
+    <div id="files" class="section">
+      <h1>Dosyalar</h1>
+      <div class="card"><h3>Yükleniyor...</h3></div>
+    </div>
+
+    <div id="messages" class="section">
+      <h1>Mesajlar</h1>
+      <div class="card"><h3>Yükleniyor...</h3></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // 🔧 Firebase ayarlarını buraya ekle
+    const firebaseConfig = {
+      apiKey: "AIzaSyDMGZ1XtGWi4Cbo5nhhB2eQkcXTVU3aYk0",
+      authDomain: "ahmet-consulting.firebaseapp.com",
+      projectId: "ahmet-consulting",
+      storageBucket: "ahmet-consulting.appspot.com",
+      messagingSenderId: "253579961791",
+      appId: "1:253579961791:web:738c1277d865069a22fdc5",
+      measurementId: "G-KHQYBLGMN5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🔹 Menü geçişleri
+    const menuLinks = document.querySelectorAll('.menu a');
+    const sections = document.querySelectorAll('.section');
+
+    menuLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        menuLinks.forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        sections.forEach(sec => sec.classList.remove('active'));
+        document.getElementById(link.dataset.section).classList.add('active');
+      });
+    });
+
+    // 🔹 Örnek veri çekme (sen Firestore'dan dolduracaksın)
+    const usersDiv = document.getElementById('users');
+    async function loadUsers() {
+      usersDiv.innerHTML = '<h1>Kullanıcılar</h1>';
+      const usersCol = collection(db, "users");
+      const snapshot = await getDocs(usersCol);
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        usersDiv.innerHTML += `
+          <div class="card">
+            <h3>${data.email}</h3>
+            <p>Rol: ${data.role}</p>
+          </div>`;
+      });
+    }
+    loadUsers();
+
+    // 🔹 Çıkış butonu
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
