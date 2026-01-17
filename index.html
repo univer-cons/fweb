@@ -1,282 +1,114 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Güvenli giriş sayfası">
-  <title>Giriş Yap</title>
-  <style>
-    /* 🌈 Arka plan ve genel stil */
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <title>Moon7</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-    /* 🔲 Giriş kutusu */
-    .login-container {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      padding: 40px 30px;
-      width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
-      text-align: center;
-      animation: fadeIn 0.8s ease;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        body {
+            margin: 0;
+            background: #0b0b0b;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            padding: 15px;
+        }
 
-    h2 {
-      color: #333;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
+        h1 {
+            font-size: 26px;
+            margin-bottom: 5px;
+        }
 
-    input {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 10px;
-      background: #f2f2f2;
-      font-size: 15px;
-      transition: 0.3s;
-      box-sizing: border-box;
-    }
+        p {
+            font-size: 14px;
+            opacity: 0.75;
+            margin-bottom: 25px;
+        }
 
-    input:focus {
-      outline: 2px solid #667eea;
-      background: #fff;
-    }
+        .track {
+            background: #161616;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 20px rgba(255, 0, 85, 0.2);
+        }
 
-    /* Şifre konteyneri */
-    .password-container {
-      position: relative;
-      width: 100%;
-    }
+        .track h2 {
+            font-size: 18px;
+            margin: 0 0 12px 0;
+            text-align: left;
+        }
 
-    #togglePassword {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 16px;
-      padding: 0;
-      width: 24px;
-      height: 24px;
-    }
+        audio {
+            width: 100%;
+        }
 
-    /* 🟦 Giriş butonu */
-    button {
-      width: 100%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-sizing: border-box;
-    }
+        .download {
+            margin-top: 14px;
+            width: 100%;
+            display: block;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff0055, #ff4d88);
+            border-radius: 14px;
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
-    }
+        .download:active {
+            transform: scale(0.98);
+        }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    button:disabled:hover {
-      box-shadow: none !important;
-    }
-
-    p {
-      font-size: 14px;
-      color: #666;
-      margin-top: 20px;
-    }
-
-    /* Hata mesajı stili */
-    #error-message {
-      color: #e74c3c;
-      font-size: 14px;
-      margin-top: 10px;
-      min-height: 20px;
-    }
-
-    /* Yükleme göstergesi */
-    #loading {
-      display: none;
-      margin-top: 15px;
-    }
-
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 30px 20px;
-        margin: 20px;
-        width: calc(100% - 40px);
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      input, button {
-        padding: 14px 15px;
-        font-size: 16px; /* iOS zoom'u önlemek için */
-      }
-    }
-  </style>
+        footer {
+            margin-top: 30px;
+            font-size: 13px;
+            opacity: 0.5;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Giriş Yap</h2>
-    <input type="email" id="email" placeholder="E-posta adresiniz" required>
-    
-    <div class="password-container">
-      <input type="password" id="password" placeholder="Şifreniz" required>
-      <button type="button" id="togglePassword">👁️</button>
+
+    <h1>🎧 Moon7</h1>
+    <p>Telefondan dinle · İndir · Paylaş</p>
+
+    <!-- ŞARKI -->
+    <div class="track">
+        <h2>Aşık Oldum</h2>
+
+        <audio controls preload="none">
+            <source src="https://github.com/univer-cons/moon7/blob/main/A%C5%9F%C4%B1k%20oldum.mp3" type="audio/mpeg">
+            Tarayıcın desteklemiyor
+        </audio>
+
+        <a class="download" href="music/sarki1.mp3" download>
+            ⬇ Telefona İndir
+        </a>
     </div>
-    
-    <button id="loginBtn">Giriş Yap</button>
-    
-    <div id="loading">
-      <div class="spinner"></div>
-      <p>Giriş yapılıyor...</p>
+
+  
+    <div class="track">
+        <h2>Kurşun gibi</h2>
+
+        <audio controls preload="none">
+            <source src="https://github.com/univer-cons/moon7/blob/main/Kur%C5%9Fun%20gibi.mp3" type="audio/mpeg">
+        </audio>
+
+        <a class="download" href="music/yeni_sarki.mp3" download>
+            ⬇ Telefona İndir
+        </a>
     </div>
-    
-    <p id="error-message"></p>
-  </div>
+   
 
-  <script type="module">
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    <footer>
+        © 2026 | moon7.real
+    </footer>
 
-    const auth = getAuth();
-    const db = getFirestore();
-
-    // Enter tuşu ile giriş
-    document.getElementById("password").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        login();
-      }
-    });
-
-    // Şifre göster/gizle
-    document.getElementById("togglePassword").addEventListener("click", function() {
-      const passwordInput = document.getElementById("password");
-      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-      passwordInput.setAttribute("type", type);
-      this.textContent = type === "password" ? "👁️" : "🔒";
-    });
-
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const loginBtn = document.getElementById("loginBtn");
-      const errorMsg = document.getElementById("error-message");
-      const loading = document.getElementById("loading");
-
-      // Validasyon
-      if (!email || !password) {
-        errorMsg.textContent = "Lütfen tüm alanları doldurun!";
-        return;
-      }
-
-      // Butonu devre dışı bırak ve yükleme durumu
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Giriş Yapılıyor...";
-      loading.style.display = "block";
-      errorMsg.textContent = "";
-
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Firestore'da kullanıcı kontrolü
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-          const role = userSnap.data().role;
-          window.location.href = role === "admin" ? "admin.html" : "user.html";
-        } else {
-          // Yeni kullanıcı kaydı
-          await setDoc(userRef, {
-            email: user.email,
-            role: "user",
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp()
-          });
-          window.location.href = "user.html";
-        }
-
-      } catch (error) {
-        console.error("Giriş hatası:", error);
-        
-        // Hata mesajlarını Türkçeleştir
-        let errorMessage = "Giriş başarısız: ";
-        switch (error.code) {
-          case "auth/invalid-email":
-            errorMessage += "Geçersiz e-posta adresi";
-            break;
-          case "auth/user-not-found":
-            errorMessage += "Bu e-posta ile kayıtlı kullanıcı bulunamadı";
-            break;
-          case "auth/wrong-password":
-            errorMessage += "Hatalı şifre";
-            break;
-          case "auth/too-many-requests":
-            errorMessage += "Çok fazla deneme yaptınız. Lütfen daha sonra tekrar deneyin";
-            break;
-          default:
-            errorMessage += error.message;
-        }
-        
-        errorMsg.textContent = errorMessage;
-        
-        // Butonu tekrar aktif et
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Giriş Yap";
-        loading.style.display = "none";
-      }
-    }
-
-    document.getElementById("loginBtn").addEventListener("click", login);
-  </script>
 </body>
 </html>
